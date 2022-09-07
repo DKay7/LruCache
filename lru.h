@@ -2,26 +2,44 @@
 #include <iostream>
 #include <list>
 
-template <typename P>
+template <typename I, typename P>
 class LruCache
 {   
-    private:   
-        std::list <P> page_list;
-        // TODO problem is here: how to make it like...
-        // std::unordered_map<int, std::list<P>::iterator> hashtable
-        std::unordered_map<int, std::list<int>::iterator> hashtable;
+    private:
+        int cache_size;
+        std::list<P> page_list;
+        using it = typename std::list<P>::iterator;
+        std::unordered_map<I, it> hashtable;
+        bool delete_last_element_if_needed();
 
     public:
-        bool lookup_insert(int page_id, P page);
+        LruCache(int size): cache_size(size) {}
+        bool lookup_insert(I page_id, P page);
         void print_cache_data();
-};    
+};
+
+template <typename I, typename P>
+bool LruCache<I, P>::delete_last_element_if_needed() {
+    if (page_list.size() > cache_size) {
+        auto least_used = hashtable.find(page_list.back());
+        hashtable.erase(least_used->first);
+        page_list.pop_back();
+
+        return true;
+    }
+
+    return false;
+}
 
 
-template <typename P>
-bool LruCache<P>::lookup_insert(int page_id, P page) {
+template <typename I, typename P>
+bool LruCache<I, P>::lookup_insert(I page_id, P page) {
     
-    auto cached_page = hashtable.find(page_id);
+    // delete page if list size is more than cache size    
+    delete_last_element_if_needed();
 
+    auto cached_page = hashtable.find(page_id);
+    
     if (cached_page == hashtable.end()) {
         // slow_get_page()
         
@@ -38,8 +56,8 @@ bool LruCache<P>::lookup_insert(int page_id, P page) {
 }
 
 
-template <typename P>
-void LruCache<P>::print_cache_data() {
+template <typename I, typename P>
+void LruCache<I, P>::print_cache_data() {
 
     for (auto &it : page_list) {
         std::cout << it << std::endl;
