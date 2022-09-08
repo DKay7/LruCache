@@ -13,9 +13,9 @@ class LruCache
         bool delete_last_element_if_needed();
 
     public:
-        LruCache(int size): cache_size(size) {}
+        LruCache(const int size): cache_size(size), page_list(), hashtable() {}
         bool lookup_insert(I page_id, P page);
-        void print_cache_data();
+        void print_cache_data() const;
 };
 
 template <typename I, typename P>
@@ -31,13 +31,9 @@ bool LruCache<I, P>::delete_last_element_if_needed() {
     return false;
 }
 
-
 template <typename I, typename P>
 bool LruCache<I, P>::lookup_insert(I page_id, P page) {
     
-    // delete page if list size is more than cache size    
-    delete_last_element_if_needed();
-
     auto cached_page = hashtable.find(page_id);
     
     if (cached_page == hashtable.end()) {
@@ -46,20 +42,24 @@ bool LruCache<I, P>::lookup_insert(I page_id, P page) {
         // insert page to list and to hashtable
         page_list.push_front (page);
         hashtable.insert ({page_id, page_list.begin()});
+
+        // delete page from cache if list size is more than cache size    
+        delete_last_element_if_needed();
+
         return false;
     }
 
     //move page to list head
     page_list.splice(page_list.begin(), page_list, cached_page->second);
-        
+    
+
     return true;
 }
 
-
 template <typename I, typename P>
-void LruCache<I, P>::print_cache_data() {
+void LruCache<I, P>::print_cache_data() const{
 
-    for (auto &it : page_list) {
-        std::cout << it << std::endl;
+    for (auto &iter : page_list) {
+        std::cout << iter << std::endl;
     }
 }

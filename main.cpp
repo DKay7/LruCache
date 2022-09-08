@@ -9,15 +9,18 @@ int main() {
     LruCache<int, int> lru{cache_size};
     int cache_hit_cnt = 0;
 
-    while (num_data--) {
+    while (--num_data >= 0) {
         int page = 0;
         std::cin >> page;
         
         cache_hit_cnt += lru.lookup_insert(page, page);
     }
 
-    std::cout << "Cashe contains: " << std::endl;
+    #ifdef _DEBUG
+    std::cout << "Cache contains: " << std::endl;
     lru.print_cache_data();
+    #endif
+
     std::cout << "Hited " << cache_hit_cnt << std::endl;
 
     return 0;
