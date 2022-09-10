@@ -1,14 +1,18 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 #include "tests.h"
 #include "lru.h"
 
-LruCacheTests::LruCacheTests(const std::string filename): test_file(filename), test_results() {}
+LruCacheTests::LruCacheTests(const std::string tests_dir, const std::string output_filename) : 
+    test_files_dir_it(tests_dir), output_file(output_filename), test_results() {}
 
-int LruCacheTests::ProcessOneTest() {
+int LruCacheTests::ProcessOneTest(std::string filename) {
+
+    std::ifstream test_file(filename);
     int cache_size = 0, num_data = 0;
-    test_file >> num_data >> cache_size;
+    test_file >> cache_size >> num_data;
 
     LruCache<int, int> lru {cache_size};
 
@@ -20,8 +24,14 @@ int LruCacheTests::ProcessOneTest() {
 }
 
 LruCacheTests::it_pair LruCacheTests::ProcessTests() {
-    while (!test_file.eof()) {
-        int cache_hits = ProcessOneTest();
+
+    for (const auto &test_file : test_files_dir_it){
+        
+        #ifdef _DEBUG
+        std::cout << test_file.path() << std::endl;
+        #endif
+
+        int cache_hits = ProcessOneTest(test_file.path());
         test_results.push_back(cache_hits);
     }
 
@@ -29,5 +39,10 @@ LruCacheTests::it_pair LruCacheTests::ProcessTests() {
 }
 
 LruCacheTests::it_pair LruCacheTests::GetResultVector() const {
-    return std::pair<cit, cit> {test_results.cbegin(), test_results.cend()};
+    return std::pair<const_it, const_it> {test_results.cbegin(), test_results.cend()};
+}
+
+void LruCacheTests::WriteTestResultToFile() {
+    for (auto &it : test_results)
+        output_file << it << std::endl;
 }

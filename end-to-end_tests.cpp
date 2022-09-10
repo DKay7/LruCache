@@ -4,7 +4,7 @@
 
 
 int main () {
-    LruCacheTests tests{"../tests/tests.txt"};
+    LruCacheTests tests{"../tests/", "../tests/output.result"};
     
     using cit = std::vector<int>::const_iterator;
     std::pair<cit, cit> result_vec_it = tests.ProcessTests();
@@ -12,11 +12,12 @@ int main () {
     #ifdef _DEBUG
     for (auto it = result_vec_it.first; it != result_vec_it.second; ++it)
         std::cout << *it << std::endl;
+    
+    int total_hits = std::accumulate(result_vec_it.first, result_vec_it.second, 0);
+    std::cout << "Total hits: " << total_hits << std::endl;
     #endif
 
-    int total_hits = std::accumulate(result_vec_it.first, result_vec_it.second, 0);
-
-    std::cout << "Total hits: " << total_hits << std::endl;
+    tests.WriteTestResultToFile();
 
     return 0;
 }
