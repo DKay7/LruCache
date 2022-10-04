@@ -20,7 +20,7 @@ class LruCache
 
 template <typename I, typename P>
 bool LruCache<I, P>::delete_last_element_if_needed() {
-    if (page_list.size() > cache_size) {
+    if (page_list.size() > cache_size) { // FIXME works only if I == P
         auto least_used = hashtable.find(page_list.back());
         hashtable.erase(least_used->first);
         page_list.pop_back();
